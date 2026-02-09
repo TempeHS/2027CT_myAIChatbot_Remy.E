@@ -1,10 +1,8 @@
-# Project Title
-
-Simple overview of use/purpose.
+# Chat FreePT
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+An Ai chatbot for a school asignment.
 
 ## Getting Started
 
@@ -40,6 +38,9 @@ Contributors names and contact info
 ex. Mr Jones
 ex. [@benpaddlejones](https://github.com/benpaddlejones)
 
+Remy Ellis
+[@Breakerchap](https://github.com/Breakerchap)
+
 ## Version History
 
 * 0.2
@@ -50,7 +51,7 @@ ex. [@benpaddlejones](https://github.com/benpaddlejones)
 
 ## License
 
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+This project is licensed under the GNU GPL v3.0 License - see the LICENSE file for details
 
 ## Acknowledgments
 
