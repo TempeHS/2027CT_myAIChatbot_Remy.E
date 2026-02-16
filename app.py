@@ -75,6 +75,34 @@ def check_for_crisis(message):
     return False
 
 
+import re  # Add this import at the top of app.py
+
+
+def sanitise_input(message):
+    """
+    Clean and validate user input.
+    Returns cleaned message or None if invalid.
+    """
+    if not message:
+        return None
+
+    # Remove leading/trailing whitespace
+    message = message.strip()
+
+    # Check if message is empty after stripping
+    if not message:
+        return None
+
+    # Remove HTML tags (prevents script injection)
+    message = re.sub(r"<[^>]+>", "", message)
+
+    # Check length after cleaning
+    if len(message) > 500:
+        return None
+
+    return message
+
+
 @app.route("/")
 def home():
     """Serve the login screen"""
@@ -83,20 +111,28 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    """Handle chat messages and return bot responses."""
     data = request.get_json()
-    user_message = data.get("message", "")
+    raw_message = data.get("message", "")
 
-    if not user_message:
-        return jsonify({"response": "Please enter a message!"})
+    # Sanitise and validate input
+    user_message = sanitise_input(raw_message)
 
-    if len(user_message) > 500:
-        return jsonify({"response": "Message too long!"})
+    if user_message is None:
+        if not raw_message or not raw_message.strip():
+            return jsonify({"response": "Please enter a message!"})
+        else:
+            return jsonify(
+                {"response": "Message too long! Please keep it under 500 characters."}
+            )
 
-    # Safety check for crisis keywords
-    if check_for_crisis(user_message):
+    # Safety check for crisis keywords (use original for better detection)
+    if check_for_crisis(raw_message):
         return jsonify({"response": CRISIS_RESPONSE})
 
+    # Get the chatbot's response
     bot_response = chatbot.get_response(user_message)
+
     return jsonify({"response": str(bot_response)})
 
 
