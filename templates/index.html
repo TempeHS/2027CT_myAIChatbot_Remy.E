@@ -24,26 +24,27 @@
         border-radius: 10px;
         padding: 20px;
         background-color: white;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
       .message {
-        margin-bottom: 15px;
+        display: inline-block;
         padding: 10px 15px;
         border-radius: 15px;
         max-width: 80%;
+        word-wrap: break-word;
+        white-space: pre-wrap;
       }
       .user-message {
         background-color: #007bff;
         color: white;
-        margin-left: auto;
+        align-self: flex-end;
       }
       .bot-message {
         background-color: #e9ecef;
         color: #333;
-      }
-      .message-time {
-        font-size: 0.75rem;
-        opacity: 0.7;
-        margin-top: 5px;
+        align-self: flex-start;
       }
     </style>
   </head>

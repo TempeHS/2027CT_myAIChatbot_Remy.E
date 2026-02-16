@@ -77,7 +77,7 @@ def check_for_crisis(message):
 
 @app.route("/")
 def home():
-    """Serve the main chat page."""
+    """Serve the login screen"""
     return render_template("index.html")
 
 
