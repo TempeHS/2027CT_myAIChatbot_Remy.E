@@ -1,6 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from sqlite3 import connect
+from flask import Flask, render_template, request, jsonify, send_file
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+import re
+from chatterbot.trainers import ListTrainer
+import io
 
 # Create the Flask application
 app = Flask(__name__)
@@ -15,9 +19,6 @@ chatbot = ChatBot(
 # Train the chatbot with English conversations
 trainer = ChatterBotCorpusTrainer(chatbot)
 trainer.train("chatterbot.corpus.english")
-
-# Custom training for school-related topics
-from chatterbot.trainers import ListTrainer
 
 list_trainer = ListTrainer(chatbot)
 
@@ -75,7 +76,13 @@ def check_for_crisis(message):
     return False
 
 
-import re  # Add this import at the top of app.py
+def export_chat(database_file, output_file):
+    conn = connect(database_file)
+    with open(output_file, "w") as f:
+        # iterdump() returns an iterator of SQL statements
+        for line in conn.iterdump():
+            f.write("%s\n" % line)
+    conn.close()
 
 
 def sanitise_input(message):
@@ -134,6 +141,31 @@ def chat():
     bot_response = chatbot.get_response(user_message)
 
     return jsonify({"response": str(bot_response)})
+
+
+@app.route("/download_chat", methods=["POST"])
+def download_chat():
+    """
+    Expect JSON: { "messages": [ {"sender": "Bot"|"User", "message": "..."}, ... ] }
+    Returns a plaintext file where each line is "Bot: {message}" or "User: {message}".
+    """
+    data = request.get_json(silent=True) or {}
+    messages = data.get("messages", [])
+
+    lines = []
+    for m in messages:
+        sender = m.get("sender", "User")
+        text = m.get("message", "")
+        # Normalise newlines and strip extra whitespace
+        text = text.replace("\r", "").strip()
+        lines.append(f"{sender}: {text}")
+
+    content = "\n".join(lines)
+    buf = io.BytesIO(content.encode("utf-8"))
+    buf.seek(0)
+    return send_file(
+        buf, mimetype="text/plain", as_attachment=True, download_name="chat.txt"
+    )
 
 
 if __name__ == "__main__":

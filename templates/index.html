@@ -135,12 +135,16 @@
                   <button type="submit" class="btn btn-primary">Send</button>
                 </div>
               </div>
-              <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center gap-2">
                 <button
                   type="button"
-                  id="clear-btn"
-                  class="btn btn-secondary ms-3"
+                  id="download-btn"
+                  class="btn btn-success"
+                  title="Download chat as text file"
                 >
+                  ⬇️ Download
+                </button>
+                <button type="button" id="clear-btn" class="btn btn-secondary">
                   Clear
                 </button>
               </div>
@@ -214,6 +218,50 @@
         if (clearToast) clearToast.show();
         messageInput.focus();
       });
+
+      // Download chat functionality
+      document
+        .getElementById("download-btn")
+        .addEventListener("click", async function () {
+          const messageElements = chatBox.querySelectorAll(".message");
+          const messages = [];
+
+          messageElements.forEach((el) => {
+            const isUser = el.classList.contains("user-message");
+            messages.push({
+              sender: isUser ? "User" : "Bot",
+              message: el.textContent,
+            });
+          });
+
+          if (messages.length === 0) {
+            alert("No messages to download.");
+            return;
+          }
+
+          try {
+            const response = await fetch("/download_chat", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messages: messages }),
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "chat.txt";
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          } catch (error) {
+            alert("Error downloading chat. Please try again.");
+            console.error("Error:", error);
+          }
+        });
 
       // Handle form submission
       chatForm.addEventListener("submit", async function (e) {
